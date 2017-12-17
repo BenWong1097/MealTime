@@ -1,15 +1,36 @@
+var SCALE = 2;
 var canvas = document.createElement('canvas'); //Canvas object on page
-canvas.width = 500;
-canvas.height = 250;
+canvas.width = 1200;
+canvas.height = 600;
+var FLOOR = canvas.height *5/6/SCALE;
 var ctx = canvas.getContext("2d");
-ctx.fillStyle = "blue";
-ctx.fillRect(0, 0, canvas.wdith, canvas.height);
+ctx.imageSmoothingEnabled = false;
 document.body.appendChild(canvas);
 var stage = new Stage(canvas);
-
 //Graphics
-var bg;//background
-
+var bg = document.createElement("img");//background
+bg.src = "assets/bg.png";
+bg.onload = drawBg;
+var bgFloor = document.createElement("img");
+bgFloor.src = "assets/bgFloor.png";
+bgFloor.onload = drawBg;
+var drawBgCnt = 0;
+function drawBg(){
+	if(++drawBgCnt == 2){
+		//BG
+		var shape = new Shape();
+		shape.graphics.clear()
+			.beginBitmapFill(bg);
+		shape.graphics.drawRect(0,0,canvas.width,canvas.height);
+		stage.addChild(shape);
+		//FLOOR
+		var flr = new Shape();
+		flr.graphics.clear()
+			.beginBitmapFill(bgFloor);
+		flr.graphics.drawRect(0,canvas.height*(5/6) / SCALE,canvas.width,canvas.height);
+		stage.addChild(flr);
+	}
+}
 //Title[View]
 // var main;
 // var startB;
@@ -35,15 +56,6 @@ var bg;//background
 // //img.src = "assets/sciGrass.png";
 
 
-//Variables
-	//PLAYER1
-var p1Health;
-var p1 = new Player(1, "anita");
-
-	//PLAYER2
-var player2Health;
-var p2 = new Player(2, "jon");
-
 var img = ["dumpling.png"];
 var imgDict = {};
 function init(){
@@ -57,7 +69,7 @@ function init(){
 
 
 
-
+//INPUT____________________________
 //check for a touch-option
 if ('ontouchstart' in document.documentElement){
 	canvas.addEventListener('touchstart', function(e){handleKeyDown();}, false);
@@ -69,7 +81,6 @@ else{
 	document.onmousedown = handleKeyDown;
 	document.onmouseup = handleKeyUp;
 }
-
 function handleKeyDown(e){
 	console.log(e.keyCode);
 	for(var i = 0; i < 4; ++i){
@@ -78,7 +89,6 @@ function handleKeyDown(e){
 	}
 	//do stuff
 }
-
 function handleKeyUp(e){
 	//do stuff
 	for(var i = 0; i < 4; ++i){
@@ -93,6 +103,17 @@ function handleImageLoad(e){
 	//Start when all assets loaded!
 	if(++imgLoadedCnt == img.length) main();
 }
+
+
+//Variables__________________________________
+//PLAYER1
+var p1Health;
+var p1 = new Player(1, "anita");
+
+	//PLAYER2
+var player2Health;
+var p2 = new Player(2, "jon");
+
 //RENDER/UPDATE
 Ticker.setFPS(30);
 Ticker.addListener(tick);
@@ -103,27 +124,10 @@ function tick(e){
 }
 
 function main(){
-	console.log(1);
-	SpriteSheet.prototype.snapToPixel = true;
 	BitmapAnimation.prototype.snapToPixel = true;
-	var dumplingSS = new SpriteSheet({
-		images: [imgDict["dumpling.png"]],
-		frames: {width: 32, height: 32, regX: 16, regY: 16},
-		animations:{
-			walk: [0,3, "walk", 3]//4 = freq (slow by 4x)
-		},
-	});
-	var dumplingAni = new BitmapAnimation(dumplingSS);
-	dumplingAni.gotoAndPlay("walk");
-	dumplingAni.name = "monster1";
-	dumplingAni.direction = 90;
-	dumplingAni.vX = 4;
-	dumplingAni.x = 32;
-	dumplingAni.y = 32;
-	dumplingAni.currentFrame = 0;
-	dumplingAni.scaleX = 2;
-	dumplingAni.scaleY = 2;
-	stage.addChild(dumplingAni);
 	console.log(2);
+	stage.setTransform(0,0,SCALE,SCALE);
+	level1();
 }
 init();
+
