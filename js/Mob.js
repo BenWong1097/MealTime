@@ -11,9 +11,10 @@ function Mob(bitmap){
 		}
 	};
 	this.animMode = 0;
+	this.direction = 1;//-1:left, 1:right
 }
 
-var FALLVEL = 10;
+var FALLVEL = 9;
 function Player(number, type, bitmap){
 	Mob.call(this);
 	Player.prototype = Object.create(Mob.prototype);
@@ -21,12 +22,15 @@ function Player(number, type, bitmap){
 	this.type = type;
 	this.dir = [0, 0, 0, 0];
 	this.dirKey = number == 1 ? [87,65,83,68] : [38,37,40,39];
-	this.jump = -4;//lower -> jump higher
+	this.jump = -5;//lower -> jump higher
 	this.tick = function(){
 		if(this.bitmap){
 			var dx = -1*this.dir[1] + this.dir[3];
 			this.velX = dx * this.speed;
-			this.bitmap.x += this.velX;
+			var nx = this.bitmap.x + this.velX;//new X
+			if(nx > 0 && nx < canvas.width/SCALE){//Check if char won't go offscreen
+				this.bitmap.x = nx;
+			}
 			var ny = this.bitmap.y + this.velY;//newY
 			this.bitmap.y = ny > FLOOR-this.bitmap.oY ? FLOOR-this.bitmap.oY : ny;//So sprite don't fall below floor
 		}
@@ -36,9 +40,7 @@ function Player(number, type, bitmap){
 			this.velY = Math.abs(this.velY - FALLVEL) < 0.5 ? FALLVEL : this.velY;
 		}
 		//Only jump if on floor
-		console.log(1);
-		if(this.dir[0] && this.bitmap.y == FLOOR-this.bitmap.oY){
-			console.log(2);
+		if(this.dir[0] && this.bitmap.y == FLOOR-this.bitmap.oY){	
 			this.velY = this.jump;
 		}
 		//ANIMATION________________________
@@ -46,14 +48,28 @@ function Player(number, type, bitmap){
 			if(this.velX > 0 && this.animMode != 0){
 				this.animMode = 0;
 				this.bitmap.gotoAndPlay("walk_h");
+				this.direction = 1;
 			}
 			else if(this.velX < 0 && this.animMode != 1){
 				this.animMode = 1;
 				this.bitmap.gotoAndPlay("walk");
+				this.direction = -1;
 			}
-			else if(this.velX == 0 && this.animMode != 2){
+			else if(this.velX == 0){
+				if(this.direction == 1){
+					if(this.bitmap.y >= FLOOR-this.bitmap.oY)
+						this.bitmap.gotoAndStop("idle_h");
+					else if(this.velY > 0)
+						this.bitmap.gotoAndStop("jump_h");
+				}
+				else if(this.direction == -1){//direction == -1
+					if(this.bitmap.y >= FLOOR-this.bitmap.oY)
+						this.bitmap.gotoAndStop("idle");
+					else if(this.velY > 0)
+						this.bitmap.gotoAndStop("jump");
+				}
 				this.animMode = 2;
-				this.bitmap.stop();
+				//this.bitmap.gotoAndPlay("idle");
 			}
 		}
 	}

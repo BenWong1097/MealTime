@@ -5,6 +5,7 @@
     "start": "node Server.js"
   },
   "dependencies": {
+    "createjs-module": "^0.8.3",
     "express": "latest",
     "socket.io": "^1.7.3"
   }
