@@ -33,7 +33,7 @@ function drawBg(container){
 }
 
 //	Load in image assets//
-var img = ["dumpling.png","anita.png"];
+var img = ["dumpling.png","anita.png","jon.png"];
 var imgDict = {};
 function init(){
 	console.log(img);	
@@ -46,11 +46,9 @@ function init(){
 	}
 	var last = 0;
 	function loading(){//Check if all assets done loading.
-		console.log(".");
 		var soundRd = soundCnt==sounds.length;
 		var imgRd = imgLoadedCnt == img.length;
 		var SSRd = SSdone;
-		console.log("last",last);
 		if(last == 3){
 			main();//LAUNCH
 			return;
@@ -90,6 +88,18 @@ function loadSpriteSheets(){
 		},
 	});
 	SpriteSheetUtils.addFlippedFrames(anitaSS, true, false, false);
+	//JON
+	jonSS = new SpriteSheet({
+		images: [imgDict["jon.png"]],
+		frames: {width: 32, height: 32, regX: 16, regY: 16},
+		animations:{
+			walk: [1,4, "walk", 3],//4 = freq (slow by 4x)
+			idle: 0,
+			jump: 5
+			//hurt: [5,5, "idle"]
+		},
+	});
+	SpriteSheetUtils.addFlippedFrames(jonSS, true, false, false);
 	SSdone = true;
 }
 

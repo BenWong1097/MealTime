@@ -7,8 +7,8 @@ function level1(){
 	initAnim(dumplingAni, "dumping", 16, 16, 16);
 	var anitaAnim = new BitmapAnimation(anitaSS);
 	p1.bitmap = initAnim(anitaAnim, "p1", 16, 16, 16);
-	var dumpAnim2 = new BitmapAnimation(dumplingSS);
-	p2.bitmap = initAnim(dumpAnim2, "p2", 16, 16, 16);
+	var jonAnim = new BitmapAnimation(jonSS);
+	p2.bitmap = initAnim(jonAnim, "p2", 16, 16, 16);
 	
 }
 
