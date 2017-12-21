@@ -7,6 +7,7 @@ var FLOOR = canvas.height *5/6/SCALE;
 var ctx = canvas.getContext("2d");
 ctx.imageSmoothingEnabled = false;
 document.body.appendChild(canvas);
+var level = 0;
 var stage = new Stage(canvas);
 var camera = Camera(new Container());
 var bg = document.createElement("img");//background
@@ -33,7 +34,7 @@ function drawBg(container){
 }
 
 //	Load in image assets//
-var img = ["dumpling.png","anita.png","jon.png"];
+var img = ["dumpling.png","anita.png","jon.png","start.png"];
 var imgDict = {};
 function init(){
 	console.log(img);	
@@ -132,6 +133,14 @@ function handleKeyUp(e){
 	}
 }
 
+function handleMouseEvent(e){
+	console.log(e);
+	console.log(e.target);
+	if(e.type == "onClick" && e.target.name == "Start"){
+		level1();
+	}
+}
+
 
 imgLoadedCnt = 0;
 function handleImageLoad(e){
@@ -174,9 +183,11 @@ var p2 = new Player(2, "jon");
 Ticker.setFPS(30);
 Ticker.addListener(tick);
 function tick(e){
-	p1.tick();
-	p2.tick();
-	camera.tick();
+	if(level > 0){
+		p1.tick();
+		p2.tick();
+		camera.tick();
+	}
 	stage.update();
 }
 
@@ -186,7 +197,7 @@ function main(){
 	BitmapAnimation.prototype.snapToPixel = true;
 	stage.setTransform(0,0,SCALE,SCALE);
 	// createjs.Sound.play(1, {loop:-1});
-	level1();
+	intro();
 }
 console.log(img);
 init();

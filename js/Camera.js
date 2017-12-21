@@ -4,7 +4,6 @@ function Camera(container){
 			if(!(p2 && p2.bitmap)) p2 = p1;
 			var x = (p1.bitmap.x + p2.bitmap.x)/2;
 			var dx = 0;
-			console.log(Math.abs(x - canvas.width/2/SCALE));
 			if(Math.abs(x - canvas.width/2/SCALE) < 2){}
 			else if (Math.abs(x) < canvas.width/2/SCALE){
 				dx = container.x < 0 ? 1 : 0;
