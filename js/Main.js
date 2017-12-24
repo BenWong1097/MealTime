@@ -29,12 +29,13 @@ function drawBg(container){
 	var flr = new Shape();
 	flr.graphics.clear()
 		.beginBitmapFill(bgFloor);
-	flr.graphics.drawRect(0,canvas.height*(5/6) / SCALE,canvas.width,canvas.height);
+	flr.graphics.drawRect(0,0,canvas.width,canvas.height);
+	flr.y = canvas.height*(5/6) / SCALE;
 	container.addChild(flr);
 }
 
 //	Load in image assets//
-var img = ["dumpling.png","anita.png","jon.png","start.png"];
+var img = ["dumpling.png","anita.png","jon.png","gramps.png","start.png"];
 var imgDict = {};
 function init(){
 	console.log(img);	
@@ -101,6 +102,18 @@ function loadSpriteSheets(){
 		},
 	});
 	SpriteSheetUtils.addFlippedFrames(jonSS, true, false, false);
+	//GRAMPS
+	grampsSS = new SpriteSheet({
+		images: [imgDict["gramps.png"]],
+		frames: {width: 32, height: 32, regX: 16, regY: 16},
+		animations:{
+			walk: [1,4, "walk", 3],//4 = freq (slow by 4x)
+			idle: 0,
+			jump: 5
+			//hurt: [5,5, "idle"]
+		},
+	});
+	SpriteSheetUtils.addFlippedFrames(grampsSS, true, false, false);
 	SSdone = true;
 }
 
@@ -150,6 +163,59 @@ function handleImageLoad(e){
 	}
 }
 
+//Will use space partitioning to make things more efficient ;)
+//	Only entities in camera will be considered
+function handleCollisions(group1, group2){
+	var g1 = [];
+	var g2 = [];
+	//Populate g1
+	for(var i=0; i<group1.length; ++i){
+			var obj = group1[i];
+		if(obj && obj.bitmap){
+			//If w/i bounds
+			if(obj.bitmap.x>0 && obj.bitmap.x<canvas.width/SCALE){
+				g1[g1.length] = obj;
+			}
+		}
+	}
+	//Populate g2
+	for(var i=0; i<group2.length; ++i){
+		var obj = group2[i];
+		if(obj && obj.bitmap){
+			//If w/i bounds
+			if(obj.bitmap.x>0 && obj.bitmap.x<canvas.width/SCALE){
+				g2[g2.length] = obj;
+			}	
+		}
+	}
+	//Cross-check
+	for(var i=0; i<g1.length; ++i){
+		for(var j=0; j<g2.length; ++j){
+			var w1 = g1[i].bitmap.width;
+			var w2 = g2[j].bitmap.width;
+			var h1 = g1[i].bitmap.height;
+			var h2 = g2[j].bitmap.height;
+			var x1 = g1[i].bitmap.x;
+			var x2 = g2[j].bitmap.x;
+			var y1 = g1[i].bitmap.y;
+			var y2 = g2[j].bitmap.y;
+			//Actual boundary check~____________________
+			// console.log(1);
+			if(x1+w1/2 > x2-w2/2 && x1-w1/2<x2+w2/2){
+				// console.log(2);
+				if(y1+h1/2 > y2-h2/2 && y1-h1/2<y2+h2/2){
+					console.log(Date.now());
+					if(g1[i].handleCollision)
+						g1[i].handleCollision(g2[j]);
+					if(g2[j].handleCollision)
+						g2[j].handleCollision(g1[i]);
+					break;
+				}
+			}
+		}
+	}
+}
+
 //MUSIC________________________________________
 var bgMusic = SoundJS.play("assets/sounds/bg.mp3");
 var soundCnt = 0;
@@ -172,22 +238,27 @@ function soundLoaded(e){
 
 //Variables______________________________________
 //PLAYER1
-var p1Health;
-var p1 = new Player(1, "anita");
+var p1;// = new Player(1, "anita");
 
 	//PLAYER2
-var player2Health;
-var p2 = new Player(2, "jon");
+var p2;// = new Player(2, "jon");
 
+var enemies = [];
 //RENDER/UPDATE___________________________________
 Ticker.setFPS(30);
 Ticker.addListener(tick);
 function tick(e){
 	if(level > 0){
-		p1.tick();
-		p2.tick();
+		if(p1 && p2){
+			p1.tick();
+			p2.tick();
+		}
 		camera.tick();
+		for(var i=0; i<enemies.length; ++i){
+			enemies[i].tick();
+		}
 	}
+	handleCollisions([p1,p2], enemies);
 	stage.update();
 }
 

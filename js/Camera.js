@@ -1,4 +1,4 @@
-function Camera(container){
+function Camera(container,size=-600){
 	container.tick = function(){
 		if(p1 && p1.bitmap){
 			if(!(p2 && p2.bitmap)) p2 = p1;
@@ -9,11 +9,14 @@ function Camera(container){
 				dx = container.x < 0 ? 1 : 0;
 			}
 			else{
-				dx = container.x > -100 ? -1 : 0;
+				dx = container.x > size ? -1 : 0;
 			}
 			container.x += dx;
 			p1.bitmap.x += dx;
 			p2.bitmap.x += (p1!=p2) ? dx : 0;//If single plr, doesn't move both
+			for(var i=0; i<enemies.length; ++i){
+				enemies[i].bitmap.x += dx;
+			}
 		}
 	}
 	return container;
