@@ -7,6 +7,7 @@ var FLOOR = canvas.height *5/6/SCALE;
 var ctx = canvas.getContext("2d");
 ctx.imageSmoothingEnabled = false;
 document.body.appendChild(canvas);
+var gameOver;
 var level = 0;
 var stage = new Stage(canvas);
 var camera = Camera(new Container());
@@ -35,7 +36,10 @@ function drawBg(container){
 }
 
 //	Load in image assets//
-var img = ["dumpling.png","anita.png","jon.png","gramps.png","start.png"];
+var img = ["anita.png","jon.png","gramps.png","michelle.png","gramma.png",
+	"start.png",
+	"dumpling.png","springroll.png","eggroll.png",
+	];
 var imgDict = {};
 function init(){
 	console.log(img);	
@@ -64,7 +68,8 @@ function init(){
 	loading();
 }
 //	Load Spritesheets//
-var dumplingSS, anitaSS;
+var dumplingSS;
+var anitaSS, jonSS;
 var SSdone = false;
 function loadSpriteSheets(){
 	//DUMPLING
@@ -78,6 +83,28 @@ function loadSpriteSheets(){
 		},
 	});
 	SpriteSheetUtils.addFlippedFrames(dumplingSS, true, false, false);
+	//SPRINGROLL
+	springrollSS = new SpriteSheet({
+		images: [imgDict["springroll.png"]],
+		frames: {width: 32, height: 32, regX: 16, regY: 16},
+		animations:{
+			walk: [0,3, "walk", 3],//4 = freq (slow by 4x)
+			idle: 0,
+			hurt: [4,4, "idle"]
+		},
+	});
+	SpriteSheetUtils.addFlippedFrames(springrollSS, true, false, false);
+	//EGGROLL
+	eggrollSS = new SpriteSheet({
+		images: [imgDict["eggroll.png"]],
+		frames: {width: 32, height: 32, regX: 16, regY: 16},
+		animations:{
+			walk: [0,3, "walk", 3],//4 = freq (slow by 4x)
+			idle: 0,
+			hurt: [4,4, "idle"]
+		},
+	});
+	SpriteSheetUtils.addFlippedFrames(eggrollSS, true, false, false);
 	//ANITA
 	anitaSS = new SpriteSheet({
 		images: [imgDict["anita.png"]],
@@ -85,8 +112,8 @@ function loadSpriteSheets(){
 		animations:{
 			walk: [1,4, "walk", 3],//4 = freq (slow by 4x)
 			idle: 0,
-			jump: 5
-			//hurt: [5,5, "idle"]
+			jump: 5,
+			attack: [6,18, "idle",2]
 		},
 	});
 	SpriteSheetUtils.addFlippedFrames(anitaSS, true, false, false);
@@ -97,8 +124,8 @@ function loadSpriteSheets(){
 		animations:{
 			walk: [1,4, "walk", 3],//4 = freq (slow by 4x)
 			idle: 0,
-			jump: 5
-			//hurt: [5,5, "idle"]
+			jump: 5,
+			attack: [6,17, "idle", 4]
 		},
 	});
 	SpriteSheetUtils.addFlippedFrames(jonSS, true, false, false);
@@ -109,11 +136,35 @@ function loadSpriteSheets(){
 		animations:{
 			walk: [1,4, "walk", 3],//4 = freq (slow by 4x)
 			idle: 0,
-			jump: 5
-			//hurt: [5,5, "idle"]
+			jump: 5,
+			attack: [6,17,"idle"],
 		},
 	});
 	SpriteSheetUtils.addFlippedFrames(grampsSS, true, false, false);
+	//MICHELLE
+	michelleSS = new SpriteSheet({
+		images: [imgDict["michelle.png"]],
+		frames: {width: 32, height: 32, regX: 16, regY: 16},
+		animations:{
+			walk: [1,4, "walk", 3],//4 = freq (slow by 4x)
+			idle: 0,
+			jump: 5,
+			attack: [6,12,"idle"],
+		},
+	});
+	SpriteSheetUtils.addFlippedFrames(michelleSS, true, false, false);
+	//GRAMMA
+	grammaSS = new SpriteSheet({
+		images: [imgDict["gramma.png"]],
+		frames: {width: 32, height: 32, regX: 16, regY: 16},
+		animations:{
+			walk: [1,4, "walk", 3],//4 = freq (slow by 4x)
+			idle: 0,
+			jump: 5,
+			attack: [6,12,"idle", 4],
+		},
+	});
+	SpriteSheetUtils.addFlippedFrames(grammaSS, true, false, false);
 	SSdone = true;
 }
 
@@ -130,27 +181,73 @@ else{
 	document.onmousedown = handleKeyDown;
 	document.onmouseup = handleKeyUp;
 }
+var charNames = ["anita","jon","gramma","gramps","michelle"];//Makes matching easier
 function handleKeyDown(e){
-	console.log(e.keyCode);
-	for(var i = 0; i < 4; ++i){
-		if(p1.dirKey[i] == e.keyCode) p1.dir[i] = 1;
-		if(p2.dirKey[i] == e.keyCode) p2.dir[i] = 1;
+	char = [anitaSS, jonSS, grammaSS, grampsSS, michelleSS];
+
+	if(level == 0 && e.keyCode == 32){
+		choosePlayers();
+	}
+	else if(level >= 1){
+		for(var i = 0; i < p1.dirKey.length; ++i){
+			if(p1.dirKey[i] == e.keyCode) p1.dir[i] = 1;
+			if(p2.dirKey[i] == e.keyCode) p2.dir[i] = 1;
+		}
+		//LEVEL MANAGER
+		if(nextLevel && e.keyCode == 32){
+			nextLevel = false;
+			enemies = [];
+			bulletsE = [];
+			createjs.Sound.stop();
+			if(level == 1){//Since there's only 1 level
+				intro();
+			}
+		}
+	}
+	else if(level == 0.5){//Char selection
+		if(e.keyCode == 68){//d
+			handleCharChange(1, 1);
+		}
+		else if(e.keyCode == 65){//a
+			handleCharChange(1, -1);
+		}
+		else if(e.keyCode == 39){//~>
+			handleCharChange(2, 1);
+		}
+		else if(e.keyCode == 37){//<~
+			handleCharChange(2, -1);
+		}
+		else if(e.keyCode == 32){//space(start)
+			var i1 = char.indexOf(choose1.spriteSheet);
+			var i2 = char.indexOf(choose2.spriteSheet);
+			level1(charNames[i1], charNames[i2]);
+		}
 	}
 	//do stuff
 }
+function handleCharChange(c, offset){
+	var curChar = (c == 1) ? choose1 : choose2;
+	var newChar;
+	var index = char.indexOf(curChar.spriteSheet);
+	index += offset;
+	index = (index >= char.length) ? 0 : index;
+	index = (index < 0) ? char.length-1 : index;
+	curChar.spriteSheet = char[index];
+}
+
 function handleKeyUp(e){
 	//do stuff
-	for(var i = 0; i < 4; ++i){
-		if(p1.dirKey[i] == e.keyCode) p1.dir[i] = 0;
-		if(p2.dirKey[i] == e.keyCode) p2.dir[i] = 0;
+	if(level >= 1){
+		for(var i = 0; i < p1.dirKey.length; ++i){
+			if(p1.dirKey[i] == e.keyCode) p1.dir[i] = 0;
+			if(p2.dirKey[i] == e.keyCode) p2.dir[i] = 0;
+		}
 	}
 }
 
 function handleMouseEvent(e){
-	console.log(e);
-	console.log(e.target);
 	if(e.type == "onClick" && e.target.name == "Start"){
-		level1();
+		choosePlayers();
 	}
 }
 
@@ -200,11 +297,8 @@ function handleCollisions(group1, group2){
 			var y1 = g1[i].bitmap.y;
 			var y2 = g2[j].bitmap.y;
 			//Actual boundary check~____________________
-			// console.log(1);
 			if(x1+w1/2 > x2-w2/2 && x1-w1/2<x2+w2/2){
-				// console.log(2);
 				if(y1+h1/2 > y2-h2/2 && y1-h1/2<y2+h2/2){
-					console.log(Date.now());
 					if(g1[i].handleCollision)
 						g1[i].handleCollision(g2[j]);
 					if(g2[j].handleCollision)
@@ -217,11 +311,13 @@ function handleCollisions(group1, group2){
 }
 
 //MUSIC________________________________________
-var bgMusic = SoundJS.play("assets/sounds/bg.mp3");
 var soundCnt = 0;
 var sounds = [
 	{
 		src: "bg.mp3", id: 1
+	},
+	{
+		src: "bgLvl1.mp3", id: 2
 	}
 ];
 function initMusic(){
@@ -244,6 +340,9 @@ var p1;// = new Player(1, "anita");
 var p2;// = new Player(2, "jon");
 
 var enemies = [];
+var bulletsE = [];//bullets targeting Enemies
+
+var nextLevel = false;
 //RENDER/UPDATE___________________________________
 Ticker.setFPS(30);
 Ticker.addListener(tick);
@@ -259,6 +358,18 @@ function tick(e){
 		}
 	}
 	handleCollisions([p1,p2], enemies);
+	handleCollisions(bulletsE, enemies);
+	if(level == 0.5 && startText)
+		startText.y = canvas.height/SCALE/2 + Math.sin(Date.now()/200);
+	if(level >= 1){
+		if(p1 && p1Score)
+			p1Score.score.text = ": "+p1.numDeaths;
+		if(p2 && p2Score)
+			p2Score.score.text = ": "+p2.numDeaths;
+		for(var i=0; i<bulletsE.length; ++i){
+			bulletsE[i].tick();
+		}
+	}
 	stage.update();
 }
 
@@ -270,5 +381,4 @@ function main(){
 	// createjs.Sound.play(1, {loop:-1});
 	intro();
 }
-console.log(img);
 init();

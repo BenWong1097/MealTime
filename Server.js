@@ -10,7 +10,7 @@ io.on('connection', function(socket){
 	console.log('Connection.');
 });
 
-http.listen(8081, function(){
+http.listen(process.env.PORT || 8081, function(){
 
 });
 //connection.end();
