@@ -6,10 +6,10 @@ function Camera(container,size=-600){
 			var dx = 0;
 			if(Math.abs(x - canvas.width/2/SCALE) < 2){}
 			else if (Math.abs(x) < canvas.width/2/SCALE){
-				dx = container.x < 0 ? 1 : 0;
+				dx = container.x < 0 ? 2 : 0;
 			}
 			else{
-				dx = container.x > size ? -1 : 0;
+				dx = container.x > size ? -2 : 0;
 			}
 			container.x += dx;
 			p1.bitmap.x += dx;

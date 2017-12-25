@@ -14,7 +14,16 @@ function intro(){
 	start.y = y;
 	start.onClick = handleMouseEvent;//Calls level1() onClick
 	start.name = "Start";
-	stage.addChild(start);
+	//BG
+	var bgImg = imgDict["bgIntro.png"];
+	width = bgImg.width;
+	height = bgImg.height;
+	var bgImgShape = new Shape();//running out of good names >->
+	bgImgShape.graphics.beginBitmapFill(bgImg).drawRect(0,0, width, height);
+	bgImgShape.scaleX = canvas.width/width/SCALE;
+	//console.log("scale",bgImgShape.scaleX, canvas.width, width);
+	bgImgShape.scaleY = bgImgShape.scaleX;
+	stage.addChild(bgImgShape, start);
 }
 function choosePlayers(){
 	level = 0.5;
@@ -48,6 +57,12 @@ function choosePlayers(){
 	text.y = canvas.height/SCALE/2;
 	stage.addChild(text);
 	startText = text;//global ref for tick
+	//Controls Tooltip
+	var controlsTT = new Text();
+	controlsTT.text = "Player 1:\n\t\tMove: WASD\n\t\tAttack: F\n\nPlayer 2:\n\t\tMove: Arrow Keys\n\t\tAttack: /";
+	controlsTT.x = canvas.width/SCALE/2;
+	controlsTT.y = canvas.height/SCALE/4;
+	stage.addChild(controlsTT);
 }
 
 function level1(plr1 = "anita", plr2 = "jon"){
@@ -63,9 +78,18 @@ function level1(plr1 = "anita", plr2 = "jon"){
 	// initAnim(dumplingAni, "dumpling", 16, 16, 16);
 	enemies[enemies.length]	= new Mob("dumpling",200);
 	enemies[enemies.length] = new Mob("dumpling",50);
-	enemies[enemies.length] = new Mob("dumpling",650);
 	enemies[enemies.length] = new Mob("springroll",200);
+	enemies[enemies.length] = new Mob("springroll",250);
 	enemies[enemies.length] = new Mob("eggroll",300);
+	enemies[enemies.length] = new Mob("eggroll",600);
+	enemies[enemies.length] = new Mob("eggroll",550);
+	enemies[enemies.length] = new Mob("springroll",550);
+	enemies[enemies.length] = new Mob("springroll",550);
+	enemies[enemies.length] = new Mob("dumpling",650);
+	enemies[enemies.length] = new Mob("eggroll",650);
+	enemies[enemies.length] = new Mob("eggroll",650);
+	enemies[enemies.length] = new Mob("eggroll",650);
+	enemies[enemies.length] = new Mob("eggroll",650);
 	//var anitaAnim = new BitmapAnimation(anitaSS);
 	//p1.bitmap = initAnim(anitaAnim, "p1", 16, 16, 16);
 	p1 = new Player(1,plr1);
@@ -93,7 +117,6 @@ function level1(plr1 = "anita", plr2 = "jon"){
 	stage.addChild(p1Score.score, p1Score.pic, p2Score.score, p2Score.pic);
 	var checkFinish = function(){
 		if (enemies.length <= 0	){
-			console.log("WOWEE");
 			gameOver = new Text();
 			gameOver.text = "YOU'VE WON!";
 			gameOver.color = "#EEFFEE";

@@ -11,10 +11,12 @@ function Mob(type="dumpling", spawn=0){
 	this.x = 30;
 	this.y = 0;
 	this.speed = 2;
+	this.jump = -5;//lower -> jump higher
 	this.dest = 0;
 	this.enroute = false;
 	this.spawn = spawn;
 	this.maxDist = 0;
+	this.probMove = 0.01;
 	//--Combat--
 	this.lastHit = Date.now();
 	this.damage = 10;
@@ -34,10 +36,11 @@ function Mob(type="dumpling", spawn=0){
 		}
 	}
 	this.hurt = function(obj){
+		this.enroute = false;
+		this.probMove = 0.5;
 		this.bitmap.gotoAndStop("hurt");
 		this.lastHit = Date.now();
 		this.health -= obj.damage;
-		console.log(this.health);
 		var dir = this.bitmap.x - obj.bitmap.x;
 		dir /= Math.abs(dir);
 		this.velX = dir*this.recoil;
@@ -73,12 +76,12 @@ function Mob(type="dumpling", spawn=0){
 		//X
 		var dx = 0;//Math.random()*2-1;
 		if(!this.enroute){
-			if(Math.random()<0.01){
+			if(Math.random()<this.probMove){
 				this.enroute = true;
 				this.dest = Math.random()*this.maxDist*2-this.maxDist+this.spawn+camera.x;
-				console.log(camera.x);
-				var iterCount = 0;
-				this.dest = Math.random()*this.maxDist*2-this.maxDist+this.spawn;
+				console.log(this.spawn, this.dest);
+				//var iterCount = 0;
+				//this.dest = Math.random()*this.maxDist*2-this.maxDist+this.spawn;
 			}
 		}
 		else{
@@ -156,13 +159,15 @@ function Mob(type="dumpling", spawn=0){
 		this.bitmap = new BitmapAnimation(springrollSS);
 		initAnim(this.bitmap, "springroll", 16, 16, 16, width=20);
 		this.speed = 1;
+		this.damage = 25;
 		this.maxDist = 60;
 	}
 	else if(this.type == "eggroll"){
 		this.bitmap = new BitmapAnimation(eggrollSS);
 		initAnim(this.bitmap, "eggroll", 16, 16, 16, width=24);
 		this.speed = 3;
-		this.maxDist = 100;
+		this.damage = 20;
+		this.maxDist = 60;
 	}
 	else if(this.type == "anita"){
 		this.bitmap = new BitmapAnimation(anitaSS);
@@ -175,16 +180,20 @@ function Mob(type="dumpling", spawn=0){
 	else if(this.type == "gramma"){
 		this.bitmap = new BitmapAnimation(grammaSS);
 		initAnim(this.bitmap, "gramma", 16, 16, 16, width=18);
+		this.speed = 1.5;
 	}
 	else if(this.type == "gramps"){
 		this.bitmap = new BitmapAnimation(grampsSS);
 		initAnim(this.bitmap, "gramps", 16, 16, 16, width=18);
 		this.atkDebounce = 250;
+		this.speed = 1.5;
 	}
 	else if(this.type == "michelle"){
 		this.bitmap = new BitmapAnimation(michelleSS);
 		initAnim(this.bitmap, "michelle", 16, 16, 16, width=18);
 		this.atkDebounce = 200;
+		this.jump = -6;
+		this.speed = 2.5;
 	}
 	this.bitmap.x = spawn;
 	//Only nonplayers spawn on floor!
@@ -199,7 +208,6 @@ function Player(number, type, bitmap){
 	this.type = type;
 	this.dir = [0, 0, 0, 0, 0];//WASDF
 	this.dirKey = number == 1 ? [87,65,83,68,70] : [38,37,40,39,191];
-	this.jump = -5;//lower -> jump higher
 	this.tick = function(){
 		if(this.bitmap){
 			var dx = -1*this.dir[1] + this.dir[3];

@@ -37,12 +37,11 @@ function drawBg(container){
 
 //	Load in image assets//
 var img = ["anita.png","jon.png","gramps.png","michelle.png","gramma.png",
-	"start.png",
+	"start.png","bgIntro.png",
 	"dumpling.png","springroll.png","eggroll.png",
 	];
 var imgDict = {};
 function init(){
-	console.log(img);	
 	initMusic();
 	for(var i = 0; i<img.length; ++i){
 		var curImg = new Image();
@@ -183,6 +182,7 @@ else{
 }
 var charNames = ["anita","jon","gramma","gramps","michelle"];//Makes matching easier
 function handleKeyDown(e){
+	console.log(e.keyCode);
 	char = [anitaSS, jonSS, grammaSS, grampsSS, michelleSS];
 
 	if(level == 0 && e.keyCode == 32){
