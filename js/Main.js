@@ -174,12 +174,10 @@ if ('ontouchstart' in document.documentElement){
 	canvas.addEventListener('touchstart', function(e){handleKeyDown();}, false);
 	canvas.addEventListener('touchend', function(e){handleKeyUp();}, false);
 }
-else{
-	document.onkeydown = handleKeyDown;
-	document.onkeyup = handleKeyUp;
-	document.onmousedown = handleKeyDown;
-	document.onmouseup = handleKeyUp;
-}
+document.onkeydown = handleKeyDown;
+document.onkeyup = handleKeyUp;
+document.onmousedown = handleKeyDown;
+document.onmouseup = handleKeyUp;
 var charNames = ["anita","jon","gramma","gramps","michelle"];//Makes matching easier
 function handleKeyDown(e){
 	console.log(e.keyCode);
